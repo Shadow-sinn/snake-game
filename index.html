@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="game-container">
-        <h1 id="game-title">Snake Game</h1>
-        <div class="score-container">
-            <div class="score-display" id="score">Score: 0</div>
-        </div>
-        <canvas id="canvas"></canvas>
-        <div id="game-over-message">Game Over!<br>Votre score final est 0</div>
-        <button id="start-btn">Commencer</button>
+  <div class="game-container">
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+      <button id="start-btn">Démarrer</button>
+      <div class="score-container">
+        <span>Score : </span>
+        <span id="score">0</span>
+      </div>
     </div>
     <script src="script.js"></script>
 </body>
