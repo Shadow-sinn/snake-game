@@ -1,27 +1,20 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jeu du Serpent</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="game-container">
-    <canvas id="canvas"></canvas>
-    <div class="controls">
-      <button id="start-btn">Démarrer</button>
-      <div class="score-container">
-        <span>Score : </span>
-        <span id="score">0</span>
-      </div>
+    <div class="game-container">
+        <div class="score-container">
+            <div class="score-display" id="score">Score: 0</div>
+        </div>
+        <canvas id="canvas"></canvas>
+        <div id="game-over-message">Game Over!<br>Votre score final est 0</div>
+        <button id="start-btn">Commencer</button>
     </div>
-  </div>
-
-  <div id="game-over-message">
-
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
