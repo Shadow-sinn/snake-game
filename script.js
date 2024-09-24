@@ -39,7 +39,7 @@ function init() {
   obstacleInterval = setInterval(moveObstacle, OBSTACLE_UPDATE_INTERVAL);
 
   updateScoreDisplay();
-  gameOverMessage.style.display = 'none'; // Hide the game over message initially
+  gameOverMessage.style.display = 'none';
 }
 
 function generateFood() {
@@ -104,7 +104,7 @@ function update() {
     snake.some((segment, index) => index > 0 && segment.x === head.x && segment.y === head.y)
   ) {
     isGameRunning = false;
-    gameOverMessage.style.display = 'block'; 
+    gameOverMessage.style.display = 'flex'; 
     gameOverMessage.textContent = `Game Over! Your final score is ${score}`; 
     return;
   }

@@ -46,3 +46,15 @@ button {
   color: white;
   font-size: 18px;
 }
+
+#game-over-message{
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  background: #000000b4;
+  color: #fff;
+  font-size: 64px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
