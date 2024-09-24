@@ -14,14 +14,14 @@ let obstacle;
 let isGameRunning = false;
 let gameInterval;
 let obstacleInterval;
-let gameOverMessage = document.getElementById('game-over-message'); 
+let gameOverMessage = document.getElementById('game-over-message');
 
 function init() {
   canvas = document.getElementById('canvas');
   ctx = canvas.getContext('2d');
   canvas.width = CANVAS_WIDTH;
   canvas.height = CANVAS_HEIGHT;
-  snake = [{ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2 }];
+  snake = [{ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2 }]; 
   direction = 'right';
   score = 0;
   food = generateFood();
@@ -39,7 +39,7 @@ function init() {
   obstacleInterval = setInterval(moveObstacle, OBSTACLE_UPDATE_INTERVAL);
 
   updateScoreDisplay();
-  gameOverMessage.style.display = 'none';
+  gameOverMessage.style.display = 'none'; 
 }
 
 function generateFood() {
@@ -61,20 +61,31 @@ function moveObstacle() {
 function draw() {
   ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  snake.forEach((segment, index) => {
-    ctx.fillStyle = index === 0 ? '#FF0000' : '#FFFFFF';
-    ctx.fillRect(segment.x, segment.y, SNAKE_SIZE, SNAKE_SIZE);
-  });
+  // Dessiner le serpent 
+  ctx.lineCap = 'round'; 
+  ctx.lineWidth = SNAKE_SIZE; 
+  ctx.strokeStyle = '#FFFFFF'; 
+  ctx.beginPath();
+  ctx.moveTo(snake[0].x + SNAKE_SIZE / 2, snake[0].y + SNAKE_SIZE / 2); 
 
+  for (let i = 1; i < snake.length; i++) {
+    ctx.lineTo(snake[i].x + SNAKE_SIZE / 2, snake[i].y + SNAKE_SIZE / 2);
+  }
+  ctx.stroke();
+
+  // Tête du serpent
+  ctx.fillStyle = '#FF0000';
+  ctx.beginPath();
+  ctx.arc(snake[0].x + SNAKE_SIZE / 2, snake[0].y + SNAKE_SIZE / 2, SNAKE_SIZE / 2, 0, 2 * Math.PI);
+  ctx.fill();
+
+  // Dessiner la nourriture
   ctx.fillStyle = '#00FF00';
   ctx.fillRect(food.x, food.y, SNAKE_SIZE, SNAKE_SIZE);
 
+  // Dessiner l'obstacle
   ctx.fillStyle = '#FF0000';
   ctx.fillRect(obstacle.x, obstacle.y, SNAKE_SIZE, SNAKE_SIZE);
-
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = '18px Arial';
-  ctx.fillText(`Score: ${score}`, 10, 20);
 }
 
 function update() {
@@ -105,7 +116,7 @@ function update() {
   ) {
     isGameRunning = false;
     gameOverMessage.style.display = 'flex'; 
-    gameOverMessage.textContent = `Game Over! Your final score is ${score}`; 
+    gameOverMessage.innerHTML = `Game Over!<br>Votre score final est ${score}`; 
     return;
   }
 
@@ -130,7 +141,7 @@ function update() {
 }
 
 function updateScoreDisplay() {
-  document.getElementById('score').textContent = score;
+  document.getElementById('score').textContent = `Score: ${score}`;
 }
 
 document.addEventListener('keydown', (event) => {
