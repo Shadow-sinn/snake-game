@@ -7,17 +7,17 @@ const gameOverMessage = document.getElementById('game-over-message');
 
 let score = 0;
 let gameInterval;
-let enemyInterval;
+let enemyIntervals = [];
 let snake = [{ x: 120, y: 120 }, { x: 90, y: 120 }, { x: 60, y: 120 }];
 let direction = 'right';
-let enemy = { x: Math.floor(Math.random() * 13) * 30, y: Math.floor(Math.random() * 13) * 30 };
+let enemies = [];
 let food = { x: Math.floor(Math.random() * 13) * 30, y: Math.floor(Math.random() * 13) * 30 };
-let lastEnemyPosition = { x: enemy.x, y: enemy.y };
+let lastEnemyPositions = [];
 
 const gameSettings = {
     easy: { enemySpeed: 7000 },
-    medium: { enemySpeed: 5000 },
-    hard: { enemySpeed: 3000 }
+    medium: { enemySpeed: 5000, enemyCount: 2 },
+    hard: { enemySpeed: 3000, enemyCount: 3 }
 };
 
 let currentLevel = gameSettings[levelSelect.value];
@@ -31,18 +31,22 @@ function startGame() {
     scoreDisplay.textContent = `Score: ${score}`;
     gameOverMessage.style.display = 'none';
     clearInterval(gameInterval);
-    clearInterval(enemyInterval);
+    enemyIntervals.forEach(interval => clearInterval(interval));
+    enemyIntervals = [];
 
     currentLevel = gameSettings[levelSelect.value];
 
     snake = [{ x: 120, y: 120 }, { x: 90, y: 120 }, { x: 60, y: 120 }];
     direction = 'right';
-    enemy = { x: Math.floor(Math.random() * 13) * 30, y: Math.floor(Math.random() * 13) * 30 };
+    enemies = [];
+    for (let i = 0; i < currentLevel.enemyCount; i++) {
+        enemies.push(getNewEnemyPosition());
+    }
     food = { x: Math.floor(Math.random() * 13) * 30, y: Math.floor(Math.random() * 13) * 30 };
-    lastEnemyPosition = { x: enemy.x, y: enemy.y };
+    lastEnemyPositions = enemies.map(enemy => ({ x: enemy.x, y: enemy.y }));
 
     gameInterval = setInterval(gameLoop, 100);
-    enemyInterval = setInterval(moveEnemy, currentLevel.enemySpeed);
+    enemyIntervals = enemies.map(enemy => setInterval(() => moveEnemy(enemy), currentLevel.enemySpeed));
 }
 
 function gameLoop() {
@@ -82,21 +86,24 @@ function gameLoop() {
     if (snake[0].x === food.x && snake[0].y === food.y) {
         score++;
         scoreDisplay.textContent = `Score: ${score}`;
-        snake.push({...snake[snake.length - 1]});
+        snake.push({ ...snake[snake.length - 1] });
         food = { x: Math.floor(Math.random() * 13) * 30, y: Math.floor(Math.random() * 13) * 30 };
     }
 
-    // Check collision with enemy
-    if (snake[0].x === enemy.x && snake[0].y === enemy.y) {
-        if (snake.length > 3) {
-            snake.splice(Math.floor(snake.length / 2));
-            score = Math.floor(score / 2);
-            scoreDisplay.textContent = `Score: ${score}`;
-        } else {
-            gameOver();
-            return;
+    // Check collision with enemies
+    for (let i = 0; i < enemies.length; i++) {
+        if (snake[0].x === enemies[i].x && snake[0].y === enemies[i].y) {
+            if (snake.length > 3) {
+                snake.splice(Math.floor(snake.length / 2));
+                score = Math.floor(score / 2);
+                scoreDisplay.textContent = `Score: ${score}`;
+            } else {
+                gameOver();
+                return;
+            }
+            enemies[i] = getNewEnemyPosition();
+            lastEnemyPositions[i] = { x: enemies[i].x, y: enemies[i].y };
         }
-        enemy = getNewEnemyPosition();
     }
 
     // Draw the snake
@@ -107,26 +114,29 @@ function gameLoop() {
     ctx.fillStyle = 'blue';
     ctx.fillRect(food.x, food.y, 30, 30);
 
-    // Draw the enemy
+    // Draw the enemies
     ctx.fillStyle = 'red';
-    ctx.fillRect(enemy.x, enemy.y, 30, 30);
+    enemies.forEach(enemy => ctx.fillRect(enemy.x, enemy.y, 30, 30));
 }
 
-function moveEnemy() {
-    enemy = getNewEnemyPosition();
+function moveEnemy(enemy) {
+    enemy = getNewEnemyPosition(enemy);
 }
 
-function getNewEnemyPosition() {
+function getNewEnemyPosition(enemy = null) {
     let newX, newY;
     do {
         newX = Math.floor(Math.random() * 13) * 30;
         newY = Math.floor(Math.random() * 13) * 30;
-    } while (isTooClose(lastEnemyPosition.x, lastEnemyPosition.y, newX, newY));
+    } while (isTooClose(enemy?.x, enemy?.y, newX, newY));
 
-    lastEnemyPosition.x = newX;
-    lastEnemyPosition.y = newY;
-
-    return { x: newX, y: newY };
+    if (enemy) {
+        enemy.x = newX;
+        enemy.y = newY;
+        return enemy;
+    } else {
+        return { x: newX, y: newY };
+    }
 }
 
 function isTooClose(x1, y1, x2, y2) {
@@ -139,7 +149,7 @@ function isTooClose(x1, y1, x2, y2) {
 
 function gameOver() {
     clearInterval(gameInterval);
-    clearInterval(enemyInterval);
+    enemyIntervals.forEach(interval => clearInterval(interval));
     gameOverMessage.style.display = 'flex';
     gameOverMessage.innerHTML = `Game Over!<br>Votre score final est ${score}`;
 }
@@ -160,6 +170,7 @@ document.addEventListener('keydown', (e) => {
 startBtn.addEventListener('click', startGame);
 levelSelect.addEventListener('change', () => {
     currentLevel = gameSettings[levelSelect.value];
-    clearInterval(enemyInterval);
-    enemyInterval = setInterval(moveEnemy, currentLevel.enemySpeed);
+    enemyIntervals.forEach(interval => clearInterval(interval));
+    enemyIntervals = [];
+    startGame();
 });
