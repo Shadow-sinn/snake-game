@@ -5,6 +5,13 @@ const levelSelect = document.getElementById('level-select');
 const scoreDisplay = document.getElementById('score');
 const gameOverMessage = document.getElementById('game-over-message');
 
+// Variable pour stocker les meilleurs scores
+let highScores = {
+    easy: 0,
+    medium: 0,
+    hard: 0
+};
+
 let score = 0;
 let gameInterval;
 let enemyIntervals = [];
@@ -111,11 +118,11 @@ function gameLoop() {
     snake.forEach(segment => ctx.fillRect(segment.x, segment.y, 30, 30));
 
     // Draw the food
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = 'red';
     ctx.fillRect(food.x, food.y, 30, 30);
 
     // Draw the enemies
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = 'black';
     enemies.forEach(enemy => ctx.fillRect(enemy.x, enemy.y, 30, 30));
 }
 
@@ -152,6 +159,24 @@ function gameOver() {
     enemyIntervals.forEach(interval => clearInterval(interval));
     gameOverMessage.style.display = 'flex';
     gameOverMessage.innerHTML = `Game Over!<br>Votre score final est ${score}`;
+
+    // Mettre à jour le meilleur score si nécessaire
+    if (score > highScores[levelSelect.value]) {
+        highScores[levelSelect.value] = score;
+        updateHighScores();
+    }
+}
+
+function updateHighScores() {
+    const highScoresElement = document.getElementById('high-scores');
+    highScoresElement.innerHTML = `
+        <h3>Meilleurs scores :</h3>
+        <ul>
+            <li>Facile : ${highScores.easy}</li>
+            <li>Moyen : ${highScores.medium}</li>
+            <li>Difficile : ${highScores.hard}</li>
+        </ul>
+    `;
 }
 
 // Event listeners
@@ -174,3 +199,6 @@ levelSelect.addEventListener('change', () => {
     enemyIntervals = [];
     startGame();
 });
+
+// Initialiser l'affichage des meilleurs scores
+updateHighScores();

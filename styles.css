@@ -135,3 +135,58 @@ body {
     padding: 10px 20px;
   }
 }
+.game-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0 auto; /* Centrer horizontalement */
+  max-width: 1000px; /* Limiter la largeur maximale */
+}
+
+.sidebar {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 5px;
+  margin-right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1; /* Prendre une partie de l'espace disponible */
+}
+
+.game-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 3; /* Prendre une plus grande partie de l'espace disponible */
+}
+
+.score-container {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.score-display {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.high-scores {
+  font-size: 18px;
+}
+
+.high-scores ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.high-scores li {
+  margin-bottom: 5px;
+}
+
+#canvas {
+  border: 1px solid black; /* Ajouter une bordure pour mieux voir le canvas */
+}

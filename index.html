@@ -8,17 +8,29 @@
 </head>
 <body>
     <div class="game-container">
-        <div class="score-container">
-            <div class="score-display" id="score">Score: 0</div>
+        <div class="sidebar">
+            <div class="score-container">
+                <div class="score-display" id="score">Score: 0</div>
+                <div class="high-scores" id="high-scores">
+                    <h3>Meilleurs scores :</h3>
+                    <ul>
+                        <li id="high-score-easy">Facile: 0</li>
+                        <li id="high-score-medium">Moyen: 0</li>
+                        <li id="high-score-hard">Difficile: 0</li>
+                    </ul>
+                </div>
+            </div>
+            <select id="level-select">
+                <option value="easy">Facile</option>
+                <option value="medium">Moyen</option>
+                <option value="hard">Difficile</option>
+            </select>
+            <button id="start-btn">Commencer</button>
         </div>
-        <canvas id="canvas" width="400" height="400"></canvas>
-        <div id="game-over-message">Game Over!<br>Votre score final est 0</div>
-        <button id="start-btn">Commencer</button>
-        <select id="level-select">
-            <option value="easy">Facile</option>
-            <option value="medium">Moyen</option>
-            <option value="hard">Difficile</option>
-        </select>
+        <div class="game-area">
+            <canvas id="canvas"></canvas>
+            <div id="game-over-message">Game Over!<br>Votre score final est 0</div>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
