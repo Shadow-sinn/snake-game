@@ -183,10 +183,18 @@ document.addEventListener('keydown', (e) => {
 
 startBtn.addEventListener('click', startGame);
 levelSelect.addEventListener('change', () => {
-    currentLevel = gameSettings[levelSelect.value];
-    enemyIntervals.forEach(interval => clearInterval(interval));
-    enemyIntervals = [];
-    startGame();
+    const selectedLevel = levelSelect.value;
+
+    if (selectedLevel === 'bonus') {
+        // Redirige vers la page bonus.html
+        window.location.href = "/game/bonus.html";
+    } else {
+        // Démarre le jeu avec le niveau sélectionné
+        currentLevel = gameSettings[selectedLevel];
+        enemyIntervals.forEach(interval => clearInterval(interval));
+        enemyIntervals = [];
+        startGame();
+    }
 });
 
 updateHighScores();
