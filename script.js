@@ -1,103 +1,71 @@
-// Récupère l'élément canvas et son contexte 2D
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-
-// Récupère les éléments HTML pour le bouton de démarrage, le sélecteur de niveau et l'affichage du score et du message de fin de partie
 const startBtn = document.getElementById('start-btn');
 const levelSelect = document.getElementById('level-select');
 const scoreDisplay = document.getElementById('score');
 const gameOverMessage = document.getElementById('game-over-message');
 
-// Initialise le score à 0
-let score = 0;
+let highScores = {
+    easy: 0,
+    medium: 0,
+    hard: 0
+};
 
-// Stocke l'intervalle pour la boucle de jeu et les intervalles pour les ennemis
+let score = 0;
 let gameInterval;
 let enemyIntervals = [];
-
-// Initialise le serpent avec sa position de départ
 let snake = [{ x: 120, y: 120 }, { x: 90, y: 120 }, { x: 60, y: 120 }];
-
-// Initialise la direction du serpent
 let direction = 'right';
-
-// Stocke les positions des ennemis
 let enemies = [];
-
-// Initialise la position de la nourriture
-let food = { x: Math.floor(Math.random() * 13) * 30, y: Math.floor(Math.random() * 13) * 30 };
-
-// Stocke les dernières positions des ennemis
+let food = { x: 0, y: 0 };
 let lastEnemyPositions = [];
 
-// Définit les paramètres de jeu en fonction du niveau de difficulté
 const gameSettings = {
-    easy: { enemySpeed: 7000 },
+    easy: { enemySpeed: 7000, enemyCount: 1 },
     medium: { enemySpeed: 5000, enemyCount: 2 },
     hard: { enemySpeed: 3000, enemyCount: 3 }
 };
 
-// Récupère le niveau de difficulté sélectionné
 let currentLevel = gameSettings[levelSelect.value];
 
-// Définit les dimensions du canvas
 canvas.width = 390;
 canvas.height = 390;
 
-// Fonction pour démarrer une nouvelle partie
 function startGame() {
-    // Réinitialise le score
     score = 0;
     scoreDisplay.textContent = `Score: ${score}`;
-
-    // Cache le message de fin de partie
     gameOverMessage.style.display = 'none';
-
-    // Arrête la boucle de jeu et les intervalles des ennemis
     clearInterval(gameInterval);
     enemyIntervals.forEach(interval => clearInterval(interval));
     enemyIntervals = [];
 
-    // Récupère le niveau de difficulté sélectionné
     currentLevel = gameSettings[levelSelect.value];
 
-    // Réinitialise le serpent, les ennemis et la nourriture
     snake = [{ x: 120, y: 120 }, { x: 90, y: 120 }, { x: 60, y: 120 }];
     direction = 'right';
     enemies = [];
     for (let i = 0; i < currentLevel.enemyCount; i++) {
         enemies.push(getNewEnemyPosition());
     }
-    food = { x: Math.floor(Math.random() * 13) * 30, y: Math.floor(Math.random() * 13) * 30 };
+    food = getNewFoodPosition();
     lastEnemyPositions = enemies.map(enemy => ({ x: enemy.x, y: enemy.y }));
 
-    // Démarre la boucle de jeu et les intervalles des ennemis
     gameInterval = setInterval(gameLoop, 100);
     enemyIntervals = enemies.map(enemy => setInterval(() => moveEnemy(enemy), currentLevel.enemySpeed));
 }
 
-// Fonction pour la boucle de jeu
 function gameLoop() {
-    // Efface le canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Déplace le serpent
     for (let i = snake.length - 1; i > 0; i--) {
         snake[i] = { ...snake[i - 1] };
     }
 
-    // Met à jour la position de la tête du serpent en fonction de la direction
-    if (direction === 'right') {
-        snake[0].x += 30;
-    } else if (direction === 'left') {
-        snake[0].x -= 30;
-    } else if (direction === 'up') {
-        snake[0].y -= 30;
-    } else if (direction === 'down') {
-        snake[0].y += 30;
-    }
+    if (direction === 'right') snake[0].x += 30;
+    else if (direction === 'left') snake[0].x -= 30;
+    else if (direction === 'up') snake[0].y -= 30;
+    else if (direction === 'down') snake[0].y += 30;
 
-    // Vérifie la collision avec les bords du canvas ou avec le corps du serpent
     if (snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height) {
         gameOver();
         return;
@@ -110,15 +78,13 @@ function gameLoop() {
         }
     }
 
-    // Vérifie la collision avec la nourriture
     if (snake[0].x === food.x && snake[0].y === food.y) {
         score++;
         scoreDisplay.textContent = `Score: ${score}`;
         snake.push({ ...snake[snake.length - 1] });
-        food = { x: Math.floor(Math.random() * 13) * 30, y: Math.floor(Math.random() * 13) * 30 };
+        food = getNewFoodPosition();
     }
 
-    // Vérifie la collision avec les ennemis
     for (let i = 0; i < enemies.length; i++) {
         if (snake[0].x === enemies[i].x && snake[0].y === enemies[i].y) {
             if (snake.length > 3) {
@@ -134,31 +100,26 @@ function gameLoop() {
         }
     }
 
-    // Dessine le serpent
     ctx.fillStyle = 'green';
     snake.forEach(segment => ctx.fillRect(segment.x, segment.y, 30, 30));
 
-    // Dessine la nourriture
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = 'red';
     ctx.fillRect(food.x, food.y, 30, 30);
 
-    // Dessine les ennemis
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = 'black';
     enemies.forEach(enemy => ctx.fillRect(enemy.x, enemy.y, 30, 30));
 }
 
-// Fonction pour déplacer un ennemi
 function moveEnemy(enemy) {
     enemy = getNewEnemyPosition(enemy);
 }
 
-// Fonction pour générer une nouvelle position pour un ennemi
 function getNewEnemyPosition(enemy = null) {
     let newX, newY;
     do {
         newX = Math.floor(Math.random() * 13) * 30;
         newY = Math.floor(Math.random() * 13) * 30;
-    } while (isTooClose(enemy?.x, enemy?.y, newX, newY));
+    } while (isPositionOnSnake(newX, newY) || isPositionTooCloseToSnake(newX, newY));
 
     if (enemy) {
         enemy.x = newX;
@@ -169,61 +130,58 @@ function getNewEnemyPosition(enemy = null) {
     }
 }
 
-// Fonction pour vérifier si la nouvelle position d'un ennemi est trop proche de sa position précédente
-function isTooClose(x1, y1, x2, y2) {
-    const distanceX = Math.abs(x1 - x2);
-    const distanceY = Math.abs(y1 - y2);
-
-    // Vérifie si la nouvelle position est à moins de 6 blocs de la position précédente
-    return distanceX < 180 && distanceY < 180;
+function getNewFoodPosition() {
+    let newX, newY;
+    do {
+        newX = Math.floor(Math.random() * 13) * 30;
+        newY = Math.floor(Math.random() * 13) * 30;
+    } while (isPositionOnSnake(newX, newY) || isPositionTooCloseToSnake(newX, newY));
+    return { x: newX, y: newY };
 }
 
-// Fonction pour gérer la fin de la partie
+function isPositionOnSnake(x, y) {
+    return snake.some(segment => segment.x === x && segment.y === y);
+}
+
+function isPositionTooCloseToSnake(x, y) {
+    return snake.some(segment => {
+        const distanceX = Math.abs(x - segment.x);
+        const distanceY = Math.abs(y - segment.y);
+        return distanceX < 60 && distanceY < 60;
+    });
+}
+
 function gameOver() {
-    // Arrête la boucle de jeu et les intervalles des ennemis
     clearInterval(gameInterval);
     enemyIntervals.forEach(interval => clearInterval(interval));
-
-    // Affiche le message de fin de partie
     gameOverMessage.style.display = 'flex';
-    gameOverMessage.innerHTML = `Game Over!<br>Votre score final est ${score}`;
+    gameOverMessage.innerHTML = `Perdu !<br>Votre score final est ${score}`;
 
-    // Mettre à jour le meilleur score si nécessaire
-    if (score > highScores[levelSelect.value]) {
-        highScores[levelSelect.value] = score;
+    const currentLevel = levelSelect.value;
+    if (score > highScores[currentLevel]) {
+        highScores[currentLevel] = score;
         updateHighScores();
     }
 }
 
 function updateHighScores() {
-    const highScoresElement = document.getElementById('high-scores');
-    highScoresElement.innerHTML = `
-        <h3>Meilleurs scores :</h3>
-        <ul>
-            <li>Facile : ${highScores.easy}</li>
-            <li>Moyen : ${highScores.medium}</li>
-            <li>Difficile : ${highScores.hard}</li>
-        </ul>
-    `;
+    const highScoreEasy = document.getElementById('high-score-easy');
+    const highScoreMedium = document.getElementById('high-score-medium');
+    const highScoreHard = document.getElementById('high-score-hard');
+
+    highScoreEasy.textContent = `Facile: ${highScores.easy}`;
+    highScoreMedium.textContent = `Moyen: ${highScores.medium}`;
+    highScoreHard.textContent = `Difficile: ${highScores.hard}`;
 }
 
-// Gestion des événements clavier pour contrôler le serpent
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp' && direction !== 'down') {
-        direction = 'up';
-    } else if (e.key === 'ArrowDown' && direction !== 'up') {
-        direction = 'down';
-    } else if (e.key === 'ArrowLeft' && direction !== 'right') {
-        direction = 'left';
-    } else if (e.key === 'ArrowRight' && direction !== 'left') {
-        direction = 'right';
-    }
+    if (e.key === 'ArrowUp' && direction !== 'down') direction = 'up';
+    else if (e.key === 'ArrowDown' && direction !== 'up') direction = 'down';
+    else if (e.key === 'ArrowLeft' && direction !== 'right') direction = 'left';
+    else if (e.key === 'ArrowRight' && direction !== 'left') direction = 'right';
 });
 
-// Gestion du clic sur le bouton de démarrage
 startBtn.addEventListener('click', startGame);
-
-// Gestion du changement de niveau de difficulté
 levelSelect.addEventListener('change', () => {
     currentLevel = gameSettings[levelSelect.value];
     enemyIntervals.forEach(interval => clearInterval(interval));
@@ -231,5 +189,4 @@ levelSelect.addEventListener('change', () => {
     startGame();
 });
 
-// Initialiser l'affichage des meilleurs scores
 updateHighScores();
