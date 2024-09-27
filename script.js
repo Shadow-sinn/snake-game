@@ -1,4 +1,3 @@
-// Sélection des éléments du DOM
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const startBtn = document.getElementById('start-btn');
@@ -6,14 +5,12 @@ const levelSelect = document.getElementById('level-select');
 const scoreDisplay = document.getElementById('score');
 const gameOverMessage = document.getElementById('game-over-message');
 
-// Initialisation des meilleurs scores
 let highScores = {
     easy: 0,
     medium: 0,
     hard: 0
 };
 
-// Variables du jeu
 let score = 0;
 let gameInterval;
 let enemyIntervals = [];
@@ -23,7 +20,6 @@ let enemies = [];
 let food = { x: 0, y: 0 };
 let lastEnemyPositions = [];
 
-// Paramètres du jeu pour chaque niveau de difficulté
 const gameSettings = {
     easy: { enemySpeed: 7000, enemyCount: 1 },
     medium: { enemySpeed: 5000, enemyCount: 2 },
@@ -32,13 +28,28 @@ const gameSettings = {
 
 let currentLevel = gameSettings[levelSelect.value];
 
-// Définition des dimensions du canvas
 canvas.width = 390;
 canvas.height = 390;
 
-// Fonction pour démarrer le jeu
+// Couleurs pour le fond animé
+let gradientColors = ["#FF69B4", "#33CC33", "#66CCCC", "#FFC080", "#FF69B4"];
+let gradientIndex = 0;
+
+function drawBackground() {
+    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < gradientColors.length; i++) {
+        gradient.addColorStop(i / (gradientColors.length - 1), gradientColors[i]);
+    }
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    gradientIndex++;
+    if (gradientIndex >= gradientColors.length) {
+        gradientIndex = 0;
+    }
+    gradientColors.push(gradientColors.shift());
+}
+
 function startGame() {
-    // Réinitialisation des variables du jeu
     score = 0;
     scoreDisplay.textContent = `Score: ${score}`;
     gameOverMessage.style.display = 'none';
@@ -48,7 +59,6 @@ function startGame() {
 
     currentLevel = gameSettings[levelSelect.value];
 
-    // Initialisation du serpent et des ennemis
     snake = [{ x: 120, y: 120 }, { x: 90, y: 120 }, { x: 60, y: 120 }];
     direction = 'right';
     enemies = [];
@@ -58,34 +68,27 @@ function startGame() {
     food = getNewFoodPosition();
     lastEnemyPositions = enemies.map(enemy => ({ x: enemy.x, y: enemy.y }));
 
-    // Démarrage des intervalles de jeu
     gameInterval = setInterval(gameLoop, 100);
     enemyIntervals = enemies.map(enemy => setInterval(() => moveEnemy(enemy), currentLevel.enemySpeed));
 }
 
-// Boucle principale du jeu
 function gameLoop() {
-    // Effacement du canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Déplacement du serpent
     for (let i = snake.length - 1; i > 0; i--) {
         snake[i] = { ...snake[i - 1] };
     }
 
-    // Mise à jour de la position de la tête du serpent
     if (direction === 'right') snake[0].x += 30;
     else if (direction === 'left') snake[0].x -= 30;
     else if (direction === 'up') snake[0].y -= 30;
     else if (direction === 'down') snake[0].y += 30;
 
-    // Vérification des collisions avec les bords
     if (snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height) {
         gameOver();
         return;
     }
 
-    // Vérification des collisions avec le corps du serpent
     for (let i = 1; i < snake.length; i++) {
         if (snake[0].x === snake[i].x && snake[0].y === snake[i].y) {
             gameOver();
@@ -93,7 +96,6 @@ function gameLoop() {
         }
     }
 
-    // Vérification de la collision avec la nourriture
     if (snake[0].x === food.x && snake[0].y === food.y) {
         score++;
         scoreDisplay.textContent = `Score: ${score}`;
@@ -101,7 +103,6 @@ function gameLoop() {
         food = getNewFoodPosition();
     }
 
-    // Vérification des collisions avec les ennemis
     for (let i = 0; i < enemies.length; i++) {
         if (snake[0].x === enemies[i].x && snake[0].y === enemies[i].y) {
             if (snake.length > 3) {
